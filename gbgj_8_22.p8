@@ -9,6 +9,9 @@ player.x = 16
 player.speed_x = 0
 player.y = 104
 
+cam_x = 0
+cam_y = 0
+
 current_room_id = 0
 
 k_left=0
@@ -107,7 +110,7 @@ function _draw()
     map(0, 0, 0, 0, 128, 64)
 
 	--Set camera position
-	cam_x,cam_y = get_camera(0,128,0,128)
+	if btn(🅾️) then cam_x,cam_y = approach(cam_x,100,5),approach(cam_y,228,5) else cam_x,cam_y = get_camera(0,128,0,128) end
 
     camera(cam_x,cam_y)
 
@@ -120,8 +123,8 @@ function approach(x, target, max_delta)
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
 
-function get_camera(min_x, max_x, min_y, max_y)
-	return min(max(min_x,player.x-60),max_x), min(max(min_x,player.y-48),max_x)
+function get_camera(left, right, top, bottom, x, y)
+	return min(max(left,player.x-60),right), min(max(top,player.y-48),bottom)
 end
 __gfx__
 0000000066666666aaaaaaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
