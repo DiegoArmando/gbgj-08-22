@@ -86,8 +86,9 @@ function update_input()
 
 end
 
-function _update()
+function _update60()
     -- running
+	update_input()
     local target, accel = 0, 0.2
     if abs(player.speed_x) > 2 and input_x == sgn(player.speed_x) then
         target,accel = 2, 0.1
@@ -110,6 +111,7 @@ function _draw()
     end
 
     print("player x:"..player.x, 10, 5, 11)
+	print("input_x:"..input_x, 10, 11, 11)
     sspr(0,32,8,16,player.x,player.y)
 end
 
