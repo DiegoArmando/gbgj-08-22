@@ -113,8 +113,8 @@ function _update60()
     for trigger in all(rooms[room_id]) do
         if player.x > (trigger[1] * 8) and
         player.x < (trigger[3] * 8) and
-        player.y < (trigger[2] * 8) and
-        player.y > (trigger[4] * 8) then
+        player.y > (trigger[2] * 8) and
+        player.y < (trigger[4] * 8) then
             room_id = trigger[5]
             player.x = trigger[6] * 8
             player.y = trigger[7] * 8
@@ -134,6 +134,8 @@ function _draw()
 
     print("player x:"..player.x, cam_x+10, cam_y+5, 11)
 	print("input_x:"..input_x, cam_x+10, cam_y+11, 11)
+	print("door_l:"..(rooms[1][1][1] * 8), cam_x+10, cam_y+16, 11)
+	print("door_l:"..(rooms[1][1][3] * 8), cam_x+10, cam_y+21, 11)
     sspr(0,32,8,16,player.x,player.y)
 end
 
