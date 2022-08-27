@@ -106,12 +106,13 @@ function _draw()
     cls()
     map(0, 0, 0, 0, 128, 64)
 
-    if current_room_id == 0 then
-        camera(0,0)
-    end
+	--Set camera position
+	cam_x,cam_y = get_camera(0,128,0,128)
 
-    print("player x:"..player.x, 10, 5, 11)
-	print("input_x:"..input_x, 10, 11, 11)
+    camera(cam_x,cam_y)
+
+    print("player x:"..player.x, cam_x+10, cam_y+5, 11)
+	print("input_x:"..input_x, cam_x+10, cam_y+11, 11)
     sspr(0,32,8,16,player.x,player.y)
 end
 
@@ -119,6 +120,9 @@ function approach(x, target, max_delta)
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
 
+function get_camera(min_x, max_x, min_y, max_y)
+	return min(max(min_x,player.x-60),max_x), min(max(min_x,player.y-48),max_x)
+end
 __gfx__
 0000000066666666aaaaaaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
 0000000066666666aaaaaaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
