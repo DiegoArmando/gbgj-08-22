@@ -5,8 +5,9 @@ __lua__
 -- matte l & brian b
 
 player = {}
-player.x = 10
-player.y = 12
+player.x = 16
+player.speed_x = 0
+player.y = 104
 
 current_room_id = 0
 
@@ -86,6 +87,18 @@ function update_input()
 end
 
 function _update()
+    -- running
+    local target, accel = 0, 0.2
+    if abs(player.speed_x) > 2 and input_x == sgn(player.speed_x) then
+        target,accel = 2, 0.1
+    elseif on_ground then
+        target, accel = 2, 0.8
+    elseif input_x != 0 then
+        target, accel = 2, 0.4
+    end
+    player.speed_x = approach(player.speed_x, input_x * target, accel)
+
+    player.x += player.speed_x
 end
 
 function _draw()
@@ -98,6 +111,10 @@ function _draw()
 
     print("player x:"..player.x, 10, 5, 11)
     sspr(0,32,8,16,player.x,player.y)
+end
+
+function approach(x, target, max_delta)
+	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
 
 __gfx__
