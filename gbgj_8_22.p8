@@ -21,10 +21,14 @@ k_other=5
 rooms = {}
 -- Trigger format:
 -- Upper Left Tile X,Y, Lower Right tile X,Y, Target Room, Target X, Target Y
-rooms[1] = { {13,9,15,14,1,33,12} }
+rooms[1] = { {13,9,15,14,2,33,13} }
 --rooms[0].spawn = 
-rooms[2] = { {29,9,31,4,0}, {48,9,50,14,2} }
-rooms[3] = { {58,9,60,14,1}}
+rooms[2] = { {29,9,31,4,1}, {48,9,50,14,3} }
+rooms[3] = { {58,9,60,14,2}}
+
+room_cam_bounds = {}
+room_cam_bounds[1] = {0,50}
+room_cam_bounds[2] = {224,274}
 
 input_x = 0
 input_interact = false
@@ -128,14 +132,15 @@ function _draw()
     map(0, 0, 0, 0, 128, 64)
 
 	--Set camera position
-	cam_x,cam_y = get_camera(0,128,0,128)
+    local rcb = room_cam_bounds
+	cam_x,cam_y = get_camera(rcb[room_id][1],rcb[room_id][2],0,128)
 
     camera(cam_x,cam_y)
 
-    print("player x:"..player.x, cam_x+10, cam_y+5, 11)
-	print("input_x:"..input_x, cam_x+10, cam_y+11, 11)
-	print("door_l:"..(rooms[1][1][1] * 8), cam_x+10, cam_y+16, 11)
-	print("door_l:"..(rooms[1][1][3] * 8), cam_x+10, cam_y+21, 11)
+    print("cam x:"..cam_x, cam_x+10, cam_y+5, 11)
+	print("cam y:"..cam_y, cam_x+10, cam_y+11, 11)
+	print("left_bound:"..(rcb[room_id][1]), cam_x+10, cam_y+16, 11)
+	print("right_bound:"..(rcb[room_id][2]), cam_x+10, cam_y+21, 11)
     sspr(0,32,8,16,player.x,player.y)
 end
 
@@ -144,7 +149,7 @@ function approach(x, target, max_delta)
 end
 
 function get_camera(min_x, max_x, min_y, max_y)
-	return min(max(min_x,player.x-60),max_x), min(max(min_x,player.y-48),max_x)
+	return min(max(min_x,player.x-60),max_x), min(max(min_y,player.y-48),max_y)
 end
 __gfx__
 0000000066666666aaaaaaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
