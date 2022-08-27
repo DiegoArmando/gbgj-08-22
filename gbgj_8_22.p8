@@ -9,6 +9,9 @@ player.x = 16
 player.speed_x = 0
 player.y = 104
 
+cam_x = 0
+cam_y = 0
+
 room_id = 1
 
 k_left=0
@@ -133,7 +136,7 @@ function _draw()
 
 	--Set camera position
     local rcb = room_cam_bounds
-	cam_x,cam_y = get_camera(rcb[room_id][1],rcb[room_id][2],0,128)
+	cam_x,cam_y = get_camera(approach(cam_x,rcb[room_id][1],25),approach(cam_x,rcb[room_id][2],25),0,128)
 
     camera(cam_x,cam_y)
 
@@ -148,8 +151,8 @@ function approach(x, target, max_delta)
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
 
-function get_camera(min_x, max_x, min_y, max_y)
-	return min(max(min_x,player.x-60),max_x), min(max(min_y,player.y-48),max_y)
+function get_camera(left, right, top, bottom)
+	return min(max(left,player.x-60),right), min(max(top,player.y-48),bottom)
 end
 __gfx__
 0000000066666666aaaaaaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
