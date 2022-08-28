@@ -58,7 +58,7 @@ rooms[5] = {}
 room_cam_bounds = {}
 room_cam_bounds[1] = {0,50}
 room_cam_bounds[2] = {224,292}
-room_cam_bounds[3] = {32,376,140,256}
+room_cam_bounds[3] = {32,272,140,252}
 room_cam_bounds[4] = {0,50}
 room_cam_bounds[5] = {0,50}
 
@@ -197,7 +197,8 @@ function _update60()
     player.speed_x = approach(player.speed_x, input_x * target, accel)
 
     player.x += player.speed_x
-
+    if player.x < 80 then player.x = 80 end
+    if player.x > 384 then player.x = 384 end
     player.interactable = check_interactable()
     if input_interact then
         if player.interactable[4] then player.holding = player.interactable[1]
@@ -433,7 +434,7 @@ function approach(x, target, max_delta)
 end
 
 function get_camera(left, right, top, bottom)
-	return min(max(left,player.x-60),right), min(max(top,player.y-128),bottom)
+	return min(max(left,player.x-60),right), player.y-104
 end
 __gfx__
 0000000066666666aaaaaaaa00000000000000000000000000000000000000004333333444444444000000000000000000d00d00000000000000000000000000
