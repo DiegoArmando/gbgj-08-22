@@ -110,6 +110,7 @@ prev_input_other = false
 input_other_pressed = 0
 
 function _init()
+    music(0)
 end
 
 function update_input()
@@ -573,5 +574,5 @@ __music__
 00 0b061044
 00 0a061144
 00 05061244
-00 0c424344
+02 0c424344
 
