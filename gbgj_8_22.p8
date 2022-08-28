@@ -79,6 +79,13 @@ cracks = {}
 -- which increases the water level
 drips = {}
 
+-- Frames since last yell
+yell_counter = 0
+yelling = false
+
+yells = {"shoo!", "git!", "off with you!", "boo!", "begone!"}
+cur_yell = ""
+
 input_x = 0
 input_interact = false
 input_interact_p = false
@@ -190,6 +197,26 @@ function _update60()
 
     animate_player()
     update_pump()
+
+    if input_other and not yelling then
+        yelling = true
+        yell_counter = 0
+        cur_yell = rnd(yells)
+        for key,s in pairs(skeletons) do
+            if abs((s[1]*8) - player.x) < 12 and s[2] >= 240 then
+                add(spawn_points,s[1])
+                skeletons[key] = nil
+            end
+        end
+    end
+
+    if yelling then
+        yell_counter += 1
+        if yell_counter >= 60 then
+            yelling = false
+            yell_counter = 0
+        end
+    end
     
     -- Check for room triggers
     for trigger in all(rooms[room_id]) do
@@ -336,13 +363,15 @@ function _draw()
     camera(cam_x,cam_y)
 
     if count(skeletons) > 0 then
-        print("skeleton x:"..skeletons[1][1]*8, cam_x+10, cam_y+5, 11)
+        --print("skeleton x:"..skeletons[1][1]*8, cam_x+10, cam_y+5, 11)
     end
-	--print("skleton y/8:"..player.y/8, cam_x+10, cam_y+11, 11)
-	--print("left_bound:"..(rcb[room_id][1]), cam_x+10, cam_y+17, 11)
-	print("skeletons:"..(count(skeletons)), cam_x+10, cam_y+17, 11)
-	print("right_bound:"..(rcb[room_id][2]), cam_x+10, cam_y+23, 11)
-    print("holding "..player.holding, cam_x+10, cam_y+29, 11)
+	print("yelling:"..tostr(yelling), cam_x+10, cam_y+11, 11)
+    if(yelling) then
+	    print(cur_yell, player.x, player.y-5, 14)
+    end
+	--print("skeletons:"..(count(skeletons)), cam_x+10, cam_y+17, 11)
+	--print("right_bound:"..(rcb[room_id][2]), cam_x+10, cam_y+23, 11)
+    --print("holding "..player.holding, cam_x+10, cam_y+29, 11)
     pal(4,0)
     spr(player.torso,player.x,player.y+player.bobble,1,1,player.flip)
     spr(player.legs,player.x,player.y+9,1,1,player.flip)
