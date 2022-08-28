@@ -10,106 +10,107 @@ __lua__
 --2: yell
 --3: crack
 --4: tape
-
-player = {}
-player.x = 224 
-player.speed_x = 0
-player.y = 240
-player.interactable = "nothing"
-player.holding = "nothing"
-player.torso = 3
-player.legs = 19
-player.bobble = 2
-player.flip = false
-
-water_level = 0
-walk_counter = 0
-
-cam_x = 0
-cam_y = 0
-
-room_id = 3
-
-k_left=0
-k_right=1
-k_up=2
-k_down=3
-k_interact=4
-k_other=5
-
-pump = {}
-pump.active = false
-pump.timer = 0
-
-computer = {}
-computer.progress = 0
-computer.cooldown = 0
-
-rooms = {}
--- Trigger format:
--- Upper Left Tile X,Y, Lower Right tile X,Y, Target Room, Target X, Target Y
-rooms[1] = { {13,9,15,14,2,33,13} }
-rooms[2] = { {29,9,31,4,1}, {48,9,50,14,3} }
-rooms[3] = { {58,9,60,14,2}}
-rooms[4] = {}
-rooms[5] = {}
-
--- Format: Xmin, Xmax, Ymin, YMax
-room_cam_bounds = {}
-room_cam_bounds[1] = {0,50}
-room_cam_bounds[2] = {224,292}
-room_cam_bounds[3] = {32,376,140,256}
-room_cam_bounds[4] = {0,50}
-room_cam_bounds[5] = {0,50}
-
--- Interactables are single tiles that do something when you touch them:
-interactables = {}
-interactables["tape"] = {48, 30, true}
-interactables["computer"] = {40, 30, false}
-interactables["pump"] = {11,30,false}
-
--- Bubbles have: Xpos, Age, Size
-bubbles = {}
-
--- Skeletons have: Xpos, Age
-skeletons = {}
-
--- Skeletons pick from this table for x pos
-spawn_points = {12,13,17,18,19,20,21,22,23,24,25,
-                30,31,32,33,34,35,36,37,
-                41,42,43}
-
--- A skeleton spawns every n seconds
-skeleton_timer = 179
-
--- Cracks in the window can appear in front of skeletons
--- Cracks are key value pairs in the form of XPos,Age
-cracks = {}
-
--- Drips fall from cracks and hit the floor,
--- which increases the water level
-drips = {}
-
--- Frames since last yell
-yell_counter = 0
-yelling = false
-
-yells = {"shoo!", "git!", "off with you!", "boo!", "begone!"}
-cur_yell = ""
-
-input_x = 0
-input_interact = false
-input_interact_p = false
-prev_input_interact = false
-input_interact_pressed = 0
-axis_x_value = 0
-axis_x_turned = false
-input_other = false
-input_other_p = false
-prev_input_other = false
-input_other_pressed = 0
-
 function _init()
+    scene = "start"
+
+    player = {}
+    player.x = 224 
+    player.speed_x = 0
+    player.y = 240
+    player.interactable = {"nothing",0,0}
+    player.holding = "nothing"
+    player.torso = 3
+    player.legs = 19
+    player.bobble = 2
+    player.flip = false
+
+    water_level = 0
+    walk_counter = 0
+
+    cam_x = 0
+    cam_y = 0
+
+    room_id = 3
+
+    k_left=0
+    k_right=1
+    k_up=2
+    k_down=3
+    k_interact=4
+    k_other=5
+
+    pump = {}
+    pump.active = false
+    pump.timer = 0
+
+    computer = {}
+    computer.progress = 0
+    computer.cooldown = 0
+    computer.target   = 25
+
+    rooms = {}
+    -- Trigger format:
+    -- Upper Left Tile X,Y, Lower Right tile X,Y, Target Room, Target X, Target Y
+    rooms[1] = { {13,9,15,14,2,33,13} }
+    rooms[2] = { {29,9,31,4,1}, {48,9,50,14,3} }
+    rooms[3] = { {58,9,60,14,2}}
+    rooms[4] = {}
+    rooms[5] = {}
+
+    -- Format: Xmin, Xmax, Ymin, YMax
+    room_cam_bounds = {}
+    room_cam_bounds[1] = {0,50}
+    room_cam_bounds[2] = {224,292}
+    room_cam_bounds[3] = {32,376,140,256}
+    room_cam_bounds[4] = {0,50}
+    room_cam_bounds[5] = {0,50}
+
+    -- Interactables are single tiles that do something when you touch them:
+    interactables = {}
+    interactables["tape"] = {48, 30, true}
+    interactables["computer"] = {40, 30, false}
+    interactables["pump"] = {11,30,false}
+
+    -- Bubbles have: Xpos, Age, Size
+    bubbles = {}
+
+    -- Skeletons have: Xpos, Age
+    skeletons = {}
+
+    -- Skeletons pick from this table for x pos
+    spawn_points = {12,13,17,18,19,20,21,22,23,24,25,
+                    30,31,32,33,34,35,36,37,
+                    41,42,43}
+
+    -- A skeleton spawns every n seconds
+    skeleton_timer = 179
+
+    -- Cracks in the window can appear in front of skeletons
+    -- Cracks are key value pairs in the form of XPos,Age
+    cracks = {}
+
+    -- Drips fall from cracks and hit the floor,
+    -- which increases the water level
+    drips = {}
+
+    -- Frames since last yell
+    yell_counter = 0
+    yelling = false
+
+    yells = {"shoo!", "git!", "off with you!", "boo!", "begone!"}
+    cur_yell = ""
+
+    input_x = 0
+    input_interact = false
+    input_interact_p = false
+    prev_input_interact = false
+    input_interact_pressed = 0
+    axis_x_value = 0
+    axis_x_turned = false
+    input_other = false
+    input_other_p = false
+    prev_input_other = false
+    input_other_pressed = 0
 end
 
 function update_input()
@@ -184,6 +185,30 @@ function check_interactable()
 end
 
 function _update60()
+    if scene == "game" then
+        _update_game()
+    elseif scene == "gameover" then
+        _update_gameover()
+    elseif scene == "start" then
+        _update_start()
+    elseif scene == "win" then
+        _update_win()
+    end
+end
+
+function _update_gameover()
+    if btnp(🅾️) then _init() end
+end
+
+function _update_win()
+    if btnp(🅾️) then _init() end
+end
+
+function _update_start()
+    if btnp(🅾️) then scene = "game" end
+end
+
+function _update_game()
     -- running
 	update_input()
     local target, accel = 0, 0.2
@@ -213,6 +238,7 @@ function _update60()
     if input_other and not yelling then
         yelling = true
         yell_counter = 0
+        sfx(2)
         cur_yell = rnd(yells)
         for key,s in pairs(skeletons) do
             if abs((s[1]*8) - player.x) < 12 and s[2] >= 240 then
@@ -226,6 +252,7 @@ function _update60()
         for xpos,age in pairs(cracks) do
             if abs((xpos*8) - player.x) < 12 then
                 cracks[xpos] = nil
+                sfx(4)
                 player.holding = "nothing"
                 for s in all(skeletons) do
                     if abs((s[1]*8) - player.x) < 12 and s[2] >= 240 then
@@ -281,6 +308,7 @@ function _update60()
         s[2] +=1
         if s[2] > 600 and cracks[s[1]] == nil then
             cracks[s[1]] = 0
+            sfx(3)
         end
     end
 
@@ -297,6 +325,7 @@ function _update60()
         if d[2] == 24 then
             del(drips, d)
             water_level += 1
+            if water_level > 100 then scene="gameover" end
         end
     end 
 end
@@ -337,12 +366,12 @@ end
 
 function computer_update()
     if computer.cooldown > 0 then computer.cooldown -= 1 else computer.cooldown = 0 end
-    if computer.progress >=25 then exit() end
+    if computer.progress >=computer.target then scene="win" end
 end
 
 function draw_computer()
-    print(computer.progress.."/25",320,230,8)
-    line(320,237,320+((computer.progress/25)*8),237,8)
+    print(computer.progress.."/"..computer.target,320,230,8)
+    line(320,237,320+((computer.progress/computer.target)*10),237,8)
 end
 
 function pump_activate()
@@ -371,8 +400,19 @@ function draw_pump()
     end
 end
 
-
 function _draw()
+    if scene == "game" then
+        _draw_game()
+    elseif scene == "gameover" then
+        _draw_gameover()
+    elseif scene == "start" then
+        _draw_start()
+    elseif scene == "win" then
+        _draw_win()
+    end
+end
+
+function _draw_game()
     cls(1)
     for b in all(bubbles) do
         circ(b[1]+(sin(b[2] / 60)),248-(b[2]/3),b[3],12)
@@ -428,6 +468,32 @@ function _draw()
     draw_computer()
 end
 
+function _draw_gameover()
+    cls()
+    color(7)
+    print("the skeletons flooded your office!")
+    print("press 🅾️ to try again")
+end
+
+function _draw_start()
+    cls()
+    color(7)
+    print("it's friday evening at the\nundersea office complex, and\nyou're about to clock out.\n")
+    print("unfortunately, your boss put a\ncursed amulet in your desk, and\nthen left for the weekend.\n")
+    print("the local skeleton population\nwould love to have it back.\n")
+    print("finish your shift before they\ncause your office to flood!\n\n")
+    print("controls:\n  🅾️: interact with objects\n  ❎: yell at skeletons")
+    print("")
+    print("press 🅾️ to start")
+end
+
+function _draw_win()
+    cls()
+    color(7)
+    print("you successfully completed your\nwork before the office flooded!\n\n")
+    print("press 🅾️ to play again")
+end
+
 function approach(x, target, max_delta)
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
@@ -435,6 +501,7 @@ end
 function get_camera(left, right, top, bottom)
 	return min(max(left,player.x-60),right), min(max(top,player.y-128),bottom)
 end
+
 __gfx__
 0000000066666666aaaaaaaa00000000000000000000000000000000000000004333333444444444000000000000000000d00d00000000000000000000000000
 0000000066666666aaaaaaaa0000000000000000000700000000000000000000355333334499994400000000000000000d0000d0000000000000000000000000
