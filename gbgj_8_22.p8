@@ -30,6 +30,10 @@ k_down=3
 k_interact=4
 k_other=5
 
+pump = {}
+pump.active = false
+pump.timer = 0
+
 rooms = {}
 -- Trigger format:
 -- Upper Left Tile X,Y, Lower Right tile X,Y, Target Room, Target X, Target Y
@@ -49,8 +53,9 @@ room_cam_bounds[5] = {0,50}
 
 -- Interactables are single tiles that do something when you touch them:
 interactables = {}
-interactables["hingus"] = {4, 14}
-interactables["bingus"] = {20, 30}
+interactables["tape"] = {48, 30, true}
+interactables["computer"] = {40, 30, false}
+interactables["pump"] = {11,30,false}
 
 -- Bubbles have: Xpos, Age, Size
 bubbles = {}
@@ -154,10 +159,10 @@ end
 function check_interactable()
     for i,v in pairs(interactables) do
         if player.x <= (v[1]*8)+8 and player.x+8 >= v[1]*8 and player.y <= (v[2]*8)+8 and player.y+16 >= v[2]*8 then
-            return i
+            return {i,v[1],v[2],v[3]}
         end
     end
-    return "nothing"
+    return {"nothing",0,0,false}
 end
 
 function _update60()
@@ -176,10 +181,15 @@ function _update60()
     player.x += player.speed_x
 
     player.interactable = check_interactable()
-    if input_interact then player.holding = player.interactable end
-    
+    if input_interact then
+        if player.interactable[4] then player.holding = player.interactable[1]
+        elseif player.interactable[1] == "pump" then pump_activate()
+        elseif player.interactable[1] == "computer" then computer_activate()
+        else scare_skeleton() end
+    end
 
     animate_player()
+    update_pump()
     
     -- Check for room triggers
     for trigger in all(rooms[room_id]) do
@@ -264,6 +274,35 @@ function draw_water()
     fillp()
 end
 
+function computer_activate()
+end
+
+function scare_skeleton()
+end
+
+function pump_activate()
+    pump.active = true
+    pump.timer = 1200
+end
+
+function update_pump()
+    if pump.active then
+        pump.timer -= 1
+        if pump.timer % 12 == 0 then water_level -= 1 end
+        if water_level < 0 then water_level = 0 end
+    end
+    if pump.timer == 0 then pump.active = false end
+end
+
+function draw_pump()
+    if pump.active then
+        if rnd({1,2}) == 1 then
+            add(bubbles, {rnd(8)+56,0,rnd({1,1,1,2,2})})
+        end
+    end
+end
+
+
 function _draw()
     cls(1)
     for b in all(bubbles) do
@@ -308,8 +347,9 @@ function _draw()
     spr(player.torso,player.x,player.y+player.bobble,1,1,player.flip)
     spr(player.legs,player.x,player.y+9,1,1,player.flip)
     pal()
-    if player.interactable != "nothing" then spr(32, player.x-8, player.y-8) end
+    if player.interactable[1] != "nothing" then spr(32, player.x-8, player.y-8) end
     draw_water()
+    draw_pump()
 end
 
 function approach(x, target, max_delta)
