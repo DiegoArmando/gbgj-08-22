@@ -4,6 +4,13 @@ __lua__
 -- gbgj 8/22
 -- matte l & brian b
 
+--sounds:
+--0: computer
+--1: pump
+--2: yell
+--3: crack
+--4: tape
+
 player = {}
 player.x = 224 
 player.speed_x = 0
@@ -33,6 +40,10 @@ k_other=5
 pump = {}
 pump.active = false
 pump.timer = 0
+
+computer = {}
+computer.progress = 0
+computer.cooldown = 0
 
 rooms = {}
 -- Trigger format:
@@ -192,11 +203,12 @@ function _update60()
         if player.interactable[4] then player.holding = player.interactable[1]
         elseif player.interactable[1] == "pump" then pump_activate()
         elseif player.interactable[1] == "computer" then computer_activate()
-        else scare_skeleton() end
+        end
     end
 
     animate_player()
     update_pump()
+    computer_update()
 
     if input_other and not yelling then
         yelling = true
@@ -302,14 +314,27 @@ function draw_water()
 end
 
 function computer_activate()
+    if computer.cooldown == 0 then
+        computer.cooldown = 90
+        computer.progress += 1
+        sfx(0)
+    end
 end
 
-function scare_skeleton()
+function computer_update()
+    if computer.cooldown > 0 then computer.cooldown -= 1 else computer.cooldown = 0 end
+    if computer.progress >=25 then exit() end
+end
+
+function draw_computer()
+    print(computer.progress.."/25",320,230,8)
+    line(320,237,320+((computer.progress/25)*8),237,8)
 end
 
 function pump_activate()
     pump.active = true
     pump.timer = 1200
+    sfx(1,3)
 end
 
 function update_pump()
@@ -318,7 +343,10 @@ function update_pump()
         if pump.timer % 12 == 0 then water_level -= 1 end
         if water_level < 0 then water_level = 0 end
     end
-    if pump.timer == 0 then pump.active = false end
+    if pump.timer == 0 then
+        pump.active = false
+        sfx(-2,3)
+    end
 end
 
 function draw_pump()
@@ -370,8 +398,8 @@ function _draw()
 	    print(cur_yell, player.x, player.y-5, 14)
     end
 	--print("skeletons:"..(count(skeletons)), cam_x+10, cam_y+17, 11)
-	--print("right_bound:"..(rcb[room_id][2]), cam_x+10, cam_y+23, 11)
-    --print("holding "..player.holding, cam_x+10, cam_y+29, 11)
+	print("timeout: "..computer.cooldown, cam_x+10, cam_y+23, 11)
+    print("progress "..computer.progress, cam_x+10, cam_y+29, 11)
     pal(4,0)
     spr(player.torso,player.x,player.y+player.bobble,1,1,player.flip)
     spr(player.legs,player.x,player.y+9,1,1,player.flip)
@@ -379,6 +407,7 @@ function _draw()
     if player.interactable[1] != "nothing" then spr(32, player.x-8, player.y-8) end
     draw_water()
     draw_pump()
+    draw_computer()
 end
 
 function approach(x, target, max_delta)
@@ -491,3 +520,9 @@ __map__
 000000000000000000014051626252405162626262626262626252404051626262626262626252655162626262526565654c00000000000000000000000000000000000000000000000000000000000000000000014c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c450000000000000000
 000000000000000070016364404040404040404040404040094040084040404040656565656565697765656565656501764c00000000000000000000000000000000000000000000000000000000000000000000014c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c450000000000000000
 0000000000000000000173744040404040401516174040191a1a1b18191a1a1a1b656565656565796767686566686566684c00000000000000000000000000000000000000000000000000000000000000000000014c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c450000000000000000
+__sfx__
+000100002e0502e0502e0502e0502e0502e0502e0502e0502e0502e0502e050310503105031050310503105031050310503105031050310503105031050310503105031050310503105031050310503105031050
+00100020046100661008610096100b6100c6100d6100e6100f61010610106101161011610116101161011610106100f6100f6100e6100d6100c6100b6100a6100961008610076100761007610066100661004610
+000200002b3502b3502b3502a3502c3502c3502d3502b35029350273502135025350273502a350323502f350283502335021350213502135021350283502a3502b350283502635026350213501c350133501a350
+00010d003f650366503565024650206501a65016650156501465013650136501365012650126500f6500000000000225500000000000000002255000000000000000022550000000000000000000000000000000
+0001000001650026500365004650056500765008650096500a6500c6500d6500e6500f650106501165012650146501565016650186501a6501b6501d6501f6502265024650276502a6502d65031650346503f650
