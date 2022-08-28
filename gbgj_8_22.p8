@@ -15,6 +15,7 @@ player.legs = 19
 player.bobble = 2
 player.flip = false
 
+water_level = 22
 walk_counter = 0
 
 cam_x = 0
@@ -212,6 +213,13 @@ function animate_player()
     end
 end
 
+function draw_water()
+    fillp(0b1010010110100101.1)
+    local top = (water_level / 100) * 27
+    rectfill(80,255-top,391,255,12)
+    fillp()
+end
+
 function _draw()
     cls(1)
     for b in all(bubbles) do
@@ -238,6 +246,7 @@ function _draw()
     spr(player.legs,player.x,player.y+9,1,1,player.flip)
     pal()
     if player.interactable != "nothing" then spr(32, player.x-8, player.y-8) end
+    draw_water()
 end
 
 function approach(x, target, max_delta)
